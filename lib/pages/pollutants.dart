@@ -169,7 +169,7 @@ class _PollutantsState extends State<Pollutants> {
                         day = day.subtract(const Duration(days: 1));
                       });
                     }),
-                Text(DateFormat('dd MMMM yyyy').format(day)),
+                Text(DateFormat('dd MM yyyy').format(day)),
                 IconButton(
                     icon: const Icon(Icons.navigate_next),
                     onPressed: () {

@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 
-class Profile extends StatelessWidget {
+class Profile extends StatefulWidget {
   Profile({Key? key}) : super(key: key);
 
   static const route = 'user';
   static const routename = 'UserPage';
 
+  @override
+  State<Profile> createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
   final _formKey = GlobalKey<FormState>();
+
+  int? radioValue;
 
   final TextEditingController ageController = TextEditingController();
 
@@ -44,9 +51,13 @@ class Profile extends StatelessWidget {
                         Radio(
                           fillColor: MaterialStateColor.resolveWith(
                               (states) => const Color(0xFF89453C)),
-                          value: 1,
-                          groupValue: 1,
-                          onChanged: (val) {},
+                          value: 0,
+                          groupValue: radioValue,
+                          onChanged: (val) {
+                            setState(() {
+                              radioValue = val;
+                            });
+                          },
                         ),
                         const Text(
                           'MALE',
@@ -55,9 +66,13 @@ class Profile extends StatelessWidget {
                         Radio(
                             fillColor: MaterialStateColor.resolveWith(
                                 (states) => const Color(0xFF89453C)),
-                            value: 2,
-                            groupValue: 1,
-                            onChanged: (val) {}),
+                            value: 1,
+                            groupValue: radioValue,
+                            onChanged: (val) {
+                              setState(() {
+                                radioValue = val;
+                              });
+                            }),
                         const Text(
                           'FEMALE',
                           style: TextStyle(
@@ -107,5 +122,5 @@ class Profile extends StatelessWidget {
             ),
           ],
         )));
-  } //build
+  }
 } //Page
