@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pollutrack/pages/login/login.dart';
 import 'package:pollutrack/pages/pollutants.dart';
 import 'package:pollutrack/pages/profile.dart';
 import 'package:pollutrack/pages/exposure.dart';
 import 'package:pollutrack/pages//info_exposure.dart';
 import 'package:pollutrack/pages/info_pollutants.dart';
 import 'package:pollutrack/providers/home_provider.dart';
+import 'package:pollutrack/services/purpleair.dart';
+import 'package:pollutrack/services/server_strings.dart';
+import 'package:pollutrack/utils/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
@@ -63,8 +67,13 @@ class _HomeState extends State<Home> {
                 ListTile(
                     leading: const Icon(MdiIcons.logout),
                     title: const Text('Logout'),
-                    // delete all data from the database
-                    onTap: () => {}),
+                    // delete all data from the preferences
+                    onTap: () async {
+                      bool reset = await Preferences().resetSettings();
+                      if (reset) {
+                        Navigator.of(context).pushReplacementNamed(Login.route);
+                      }
+                    }),
                 const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text('About'),
@@ -72,7 +81,6 @@ class _HomeState extends State<Home> {
                 ListTile(
                     leading: const Icon(MdiIcons.imageFilterDrama),
                     title: const Text('Pollution Information'),
-                    // delete all data from the database
                     onTap: () => {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => InfoPollutants(),
@@ -81,7 +89,6 @@ class _HomeState extends State<Home> {
                 ListTile(
                     leading: const Icon(MdiIcons.dotsHexagon),
                     title: const Text('Exposure Information'),
-                    // delete all data from the database
                     onTap: () => {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => InfoExposure(),
@@ -98,7 +105,23 @@ class _HomeState extends State<Home> {
               IconButton(
                   padding: const EdgeInsets.only(left: 8.0, top: 8, bottom: 8),
                   onPressed: () async {
-                    Provider.of<HomeProvider>(context, listen: false).refresh();
+                    //Provider.of<HomeProvider>(context, listen: false).refresh();
+
+                    //Let's test and get some data for now in the UI
+                    //TODO: remove this and move in the provider
+                    PurpleAirService purpleAirService = Provider.of<PurpleAirService>(context, listen: false);
+                    Preferences prefs = Provider.of<Preferences>(context, listen: false);
+                    bool auth = false;
+                    String? apiKey = prefs.purpleAirXApiKey;
+                    if (apiKey != null) {
+                      auth = await purpleAirService.getAuth(apiKey);
+                    }
+                    if (auth) {
+                      // Purple Air data fetch
+                      Map<String, dynamic> response = await purpleAirService
+                          .getData(ServerStrings.sensorIdxMortise);
+                      print(response["sensor"]["pm10.0"]);
+                    }
                   },
                   icon: const Icon(
                     MdiIcons.downloadCircle,
