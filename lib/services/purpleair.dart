@@ -4,15 +4,11 @@ import 'package:dio/dio.dart';
 
 class PurpleAirService {
   PurpleAirService(this.prefs);
-  
+
   Preferences prefs;
   final Dio _dio = Dio(BaseOptions(
     baseUrl: ServerStrings.purpleAirUrl,
   ));
-
-  Future<String?> retrieveSavedApiKey() async {
-    return prefs.purpleAirXApiKey;
-  }
 
   Future<bool> getAuth(String apiKey) async {
     try {
@@ -28,8 +24,9 @@ class PurpleAirService {
     }
   }
 
+  // example of how to get the data from purpleair
   Future<Map<String, dynamic>> getData(String sensorIdx) async {
-    String? xApiKey = await retrieveSavedApiKey();
+    String? xApiKey = prefs.purpleAirXApiKey;
     if (xApiKey != null) {
       try {
         Response response = await _dio.get(

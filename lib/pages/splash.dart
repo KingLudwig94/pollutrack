@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pollutrack/pages/home.dart';
 import 'package:pollutrack/pages/login/login.dart';
 import 'package:pollutrack/pages/onboarding/impact_ob.dart';
+import 'package:pollutrack/pages/onboarding/purpleair_ob.dart';
 import 'package:pollutrack/services/impact.dart';
 import 'package:pollutrack/utils/shared_preferences.dart';
 import 'package:provider/provider.dart';
@@ -24,18 +25,24 @@ class Splash extends StatelessWidget {
         .pushReplacement(MaterialPageRoute(builder: ((context) => Home())));
   } //_toHomePage
 
-  // Method for navigation SplashPage -> HomePage
+  // Method for navigation SplashPage -> Impact
   void _toImpactPage(BuildContext context) {
     Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: ((context) => ImpactOnboarding())));
-  } //_toHomePage
+  }
+
+  // Method for navigation SplashPage -> PurpleAirPage
+  void _toPurpleAirPage(BuildContext context) {
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: ((context) => PurpleAirOnboarding())));
+  }
 
   void _checkAuth(BuildContext context) async {
-    //Preferences prefs = Preferences();
     var prefs = Provider.of<Preferences>(context, listen: false);
     String? username = prefs.username;
     String? password = prefs.password;
 
+    // no user logged in the app
     if (username == null || password == null) {
       Future.delayed(const Duration(seconds: 1), () => _toLoginPage(context));
     } else {
@@ -44,10 +51,15 @@ class Splash extends StatelessWidget {
       bool responseAccessToken = await service.checkSavedToken();
       bool refreshAccessToken = await service.checkSavedToken(refresh: true);
 
-      if (responseAccessToken) {
-        Future.delayed(const Duration(seconds: 1), () => _toHomePage(context));
-      } else if (refreshAccessToken) {
-        Future.delayed(const Duration(seconds: 1), () => _toHomePage(context));
+      // if we have a valid token for impact, proceed
+      if (responseAccessToken || refreshAccessToken) {
+        // check if we have saved an api key for purpleair
+        if (prefs.purpleAirXApiKey != null) {
+          Future.delayed(
+              const Duration(seconds: 1), () => _toHomePage(context));
+        } else {
+          Future.delayed(const Duration(seconds: 1), () => _toPurpleAirPage(context));
+        }
       } else {
         Future.delayed(
             const Duration(seconds: 1), () => _toImpactPage(context));

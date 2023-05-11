@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pollutrack/pages/home.dart';
 import 'package:pollutrack/pages/onboarding/purpleair_ob.dart';
+import 'package:pollutrack/utils/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/impact.dart';
@@ -26,19 +28,11 @@ class _ImpactOnboardingState extends State<ImpactOnboarding> {
     });
   }
 
-  Future<bool?> _loginImpact(
+  Future<bool> _loginImpact(
       String name, String password, BuildContext context) async {
     ImpactService service = Provider.of<ImpactService>(context, listen: false);
     bool logged = await service.getTokens(name, password);
-    if (logged) {
-      Future.delayed(
-          const Duration(milliseconds: 300),
-          () => Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => PurpleAirOnboarding())));
-    } else {
-      return logged;
-    }
-    return null;
+    return logged;
   }
 
   @override
@@ -154,16 +148,33 @@ class _ImpactOnboardingState extends State<ImpactOnboarding> {
                     onPressed: () async {
                       bool? validation = await _loginImpact(userController.text,
                           passwordController.text, context);
-                      if (validation != null) {
-                        if (!validation) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(
-                            backgroundColor: Colors.red,
-                            behavior: SnackBarBehavior.floating,
-                            margin: EdgeInsets.all(8),
-                            content: Text('Wrong Credentials'),
-                            duration: Duration(seconds: 2),
-                          ));
+                      if (!validation) {
+                        // if not correct show message
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          backgroundColor: Colors.red,
+                          behavior: SnackBarBehavior.floating,
+                          margin: EdgeInsets.all(8),
+                          content: Text('Wrong Credentials'),
+                          duration: Duration(seconds: 2),
+                        ));
+                      } else {
+                        // else move to Purpleair Onboarding if we have not saved a api key yet
+                        if (Provider.of<Preferences>(context, listen: false)
+                                .purpleAirXApiKey !=
+                            null) {
+                          Future.delayed(
+                              const Duration(milliseconds: 300),
+                              () => Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) => Home())));
+                        } else {
+                          Future.delayed(
+                              const Duration(milliseconds: 300),
+                              () => Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          PurpleAirOnboarding())));
                         }
                       }
                     },

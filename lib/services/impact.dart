@@ -6,10 +6,10 @@ import 'package:pollutrack/utils/shared_preferences.dart';
 class ImpactService {
   ImpactService(this.prefs);
   Preferences prefs;
-  
+
   final Dio _dio = Dio(BaseOptions(baseUrl: ServerStrings.backendBaseUrl));
 
-  Future<String?> retrieveSavedToken(bool refresh) async {
+  String? retrieveSavedToken(bool refresh) {
     if (refresh) {
       return prefs.impactRefreshToken;
     } else {
@@ -17,8 +17,8 @@ class ImpactService {
     }
   }
 
-  Future<bool> checkSavedToken({bool refresh = false}) async {
-    String? token = await retrieveSavedToken(refresh);
+  bool checkSavedToken({bool refresh = false}) {
+    String? token = retrieveSavedToken(refresh);
     //Check if there is a token
     if (token == null) {
       return false;
@@ -60,6 +60,7 @@ class ImpactService {
     return true;
   } //checkToken
 
+  // make the call to get the tokens
   Future<bool> getTokens(String username, String password) async {
     try {
       Response response = await _dio.post(

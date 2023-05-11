@@ -16,19 +16,12 @@ class _PurpleAirOnboardingState extends State<PurpleAirOnboarding> {
   final TextEditingController userController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  Future<bool?> _contactPurpleAir(String apiKey, BuildContext context) async {
+  // method to check if the key is correct
+  Future<bool> _contactPurpleAir(String apiKey, BuildContext context) async {
     PurpleAirService purpleAirService =
         Provider.of<PurpleAirService>(context, listen: false);
     bool logged = await purpleAirService.getAuth(apiKey);
-    if (logged) {
-      Future.delayed(
-          const Duration(milliseconds: 100),
-          () => Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const Home())));
-    } else {
-      return logged;
-    }
-    return null;
+    return logged;
   }
 
   @override
@@ -95,19 +88,25 @@ class _PurpleAirOnboardingState extends State<PurpleAirOnboarding> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        bool? validation = await _contactPurpleAir(
+                        bool validation = await _contactPurpleAir(
                             userController.text, context);
-                        if (validation != null) {
-                          if (!validation) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
-                              backgroundColor: Colors.red,
-                              behavior: SnackBarBehavior.floating,
-                              margin: EdgeInsets.all(8),
-                              content: Text('Wrong API Key'),
-                              duration: Duration(seconds: 2),
-                            ));
-                          }
+                        // if not valid show a message
+                        if (!validation) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                            margin: EdgeInsets.all(8),
+                            content: Text('Wrong API Key'),
+                            duration: Duration(seconds: 2),
+                          ));
+                        } else {
+                          // else move to home
+                          Future.delayed(
+                              const Duration(milliseconds: 100),
+                              () => Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) => const Home())));
                         }
                       }
                     },

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pollutrack/pages/onboarding/purpleair_ob.dart';
+import 'package:pollutrack/utils/shared_preferences.dart';
 import 'package:provider/provider.dart';
-import '../../utils/shared_preferences.dart';
-import '../onboarding/purpleair_ob.dart';
+
 
 class Login extends StatefulWidget {
   static const route = '/login/';
@@ -18,7 +19,6 @@ class _LoginState extends State<Login> {
   final TextEditingController userController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final Preferences prefs = Preferences();
   void _showPassword() {
     setState(() {
       _passwordVisible = !_passwordVisible;
