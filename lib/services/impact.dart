@@ -75,7 +75,7 @@ class ImpactService {
       if (ImpactService.checkToken(response.data['access']) &&
           ImpactService.checkToken(response.data['refresh'])) {
         prefs.impactRefreshToken = response.data['refresh'];
-        prefs.impactAccessToken = response.data['refresh'];
+        prefs.impactAccessToken = response.data['access'];
         return true;
       } else {
         return false;

@@ -48,8 +48,8 @@ class Splash extends StatelessWidget {
     } else {
       ImpactService service =
           Provider.of<ImpactService>(context, listen: false);
-      bool responseAccessToken = await service.checkSavedToken();
-      bool refreshAccessToken = await service.checkSavedToken(refresh: true);
+      bool responseAccessToken =  service.checkSavedToken();
+      bool refreshAccessToken = service.checkSavedToken(refresh: true);
 
       // if we have a valid token for impact, proceed
       if (responseAccessToken || refreshAccessToken) {
