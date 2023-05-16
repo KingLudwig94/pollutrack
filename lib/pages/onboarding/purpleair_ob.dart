@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pollutrack/pages/home.dart';
+import 'package:pollutrack/pages/onboarding/impact_ob.dart';
 import 'package:pollutrack/services/purpleair.dart';
 import 'package:provider/provider.dart';
 
@@ -106,7 +107,8 @@ class _PurpleAirOnboardingState extends State<PurpleAirOnboarding> {
                               const Duration(milliseconds: 100),
                               () => Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
-                                      builder: (context) => const Home())));
+                                      builder: (context) =>
+                                          ImpactOnboarding())));
                         }
                       }
                     },

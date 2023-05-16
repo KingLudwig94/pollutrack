@@ -3,7 +3,7 @@ class ServerStrings {
 
   // JWT
   static const issClaim = 'backend-impact';
-  static const patientRoleIdentifier = 'researcher';
+  static const researcherRoleIdentifier = 'researcher';
 
   // URL
   static const backendBaseUrl = 'https://impact.dei.unipd.it/bwthw/';

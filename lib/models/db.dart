@@ -14,6 +14,11 @@ class PM25 {
   final double value;
 
   PM25({required this.timestamp, required this.value});
+
+  @override
+  String toString() {
+    return '${timestamp.toIso8601String()} - $value';
+  }
 }
 
 class Exposure {

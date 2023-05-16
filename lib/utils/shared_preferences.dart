@@ -24,6 +24,7 @@ class Preferences {
     }
     return value;
   }
+
   // helper method to call the correct setType method of SharedPreferences
   void _saveToDisk<T>(String key, T content) {
     if (content is String) {
@@ -50,10 +51,12 @@ class Preferences {
   // The getter allows us to forget the specific string used as key in the SharedPreferences and get a list of all saved preferences as variables of the class
 
   String? get impactRefreshToken => _getFromDisk('impactRT');
-  set impactRefreshToken(String? newImpactRefreshToken) => _saveToDisk("impactRT", newImpactRefreshToken);
-  
+  set impactRefreshToken(String? newImpactRefreshToken) =>
+      _saveToDisk("impactRT", newImpactRefreshToken);
+
   String? get impactAccessToken => _getFromDisk('impactAccessToken');
-  set impactAccessToken(String? newImpactAccessToken) => _saveToDisk("impactAccessToken", newImpactAccessToken);
+  set impactAccessToken(String? newImpactAccessToken) =>
+      _saveToDisk("impactAccessToken", newImpactAccessToken);
 
   String? get username => _getFromDisk('username');
   set username(String? newusername) => _saveToDisk("username", newusername);
@@ -62,5 +65,10 @@ class Preferences {
   set password(String? newpassword) => _saveToDisk("password", newpassword);
 
   String? get purpleAirXApiKey => _getFromDisk('purpleAirXApiKey');
-  set purpleAirXApiKey(String? newpurpleAirXApiKey) => _saveToDisk("purpleAirXApiKey", newpurpleAirXApiKey);
+  set purpleAirXApiKey(String? newpurpleAirXApiKey) =>
+      _saveToDisk("purpleAirXApiKey", newpurpleAirXApiKey);
+
+  String? get impactUsername => _getFromDisk('impactUsername');
+  set impactUsername(String? newImpactUsername) =>
+      _saveToDisk("impactUsername", newImpactUsername);
 }

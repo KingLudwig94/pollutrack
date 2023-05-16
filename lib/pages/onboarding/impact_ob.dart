@@ -5,7 +5,6 @@ import 'package:pollutrack/services/impact.dart';
 import 'package:pollutrack/utils/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
-
 class ImpactOnboarding extends StatefulWidget {
   static const route = '/impact/';
   static const routeDisplayName = 'ImpactOnboardingPage';
@@ -146,7 +145,6 @@ class _ImpactOnboardingState extends State<ImpactOnboarding> {
                   padding: const EdgeInsets.all(12.0),
                   child: ElevatedButton(
                     onPressed: () async {
-                      
                       bool? validation = await _loginImpact(userController.text,
                           passwordController.text, context);
                       if (!validation) {
@@ -160,6 +158,8 @@ class _ImpactOnboardingState extends State<ImpactOnboarding> {
                           duration: Duration(seconds: 2),
                         ));
                       } else {
+                        await Provider.of<ImpactService>(context, listen: false)
+                            .getPatient();
                         // else move to Purpleair Onboarding if we have not saved a api key yet
                         if (Provider.of<Preferences>(context, listen: false)
                                 .purpleAirXApiKey !=

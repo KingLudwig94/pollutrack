@@ -41,4 +41,19 @@ class PurpleAirService {
     }
     return {};
   }
+
+  // retrieve data from purple air API
+  Future<Map<String, dynamic>> getHistoryData(
+      String sensorIdx, DateTime startTime) async {
+    try {
+      Response response = await _dio.get(
+          '${ServerStrings.purpleAirApiSesnorDataUrl}/$sensorIdx/history/?start_timestamp=${startTime.millisecondsSinceEpoch / 1000}&fields=pm2.5_atm',
+          options: Options(headers: {'X-API-KEY': prefs.purpleAirXApiKey}));
+      //print(response);
+      return response.data;
+    } catch (e) {
+      print(e);
+      return {};
+    }
+  }
 }
