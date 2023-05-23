@@ -11,10 +11,8 @@ class Exposure extends StatelessWidget {
   static const route = '/exposure/';
   static const routeDisplayName = 'ExposurePage';
 
-  Exposure({Key? key}) : super(key: key);
+  const Exposure({Key? key}) : super(key: key);
 
-  double exposure = 2.5;
-  DateTime day = DateTime.now();
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -36,7 +34,7 @@ class Exposure extends StatelessWidget {
               height: 20,
             ),
             const Text(
-              'Exposure Trend',
+              'Total Exposure',
               style: TextStyle(
                   color: Color(0xFF89453C),
                   fontSize: 20,
@@ -55,7 +53,7 @@ class Exposure extends StatelessWidget {
                     backColor: const Color(0xFF89453C).withOpacity(0.4),
                     frontColor: const Color(0xFF89453C),
                     strokeWidth: 20,
-                    value: provider.fullexposure / 100,
+                    value: provider.fullexposure / 1000,
                   ),
                   child: Align(
                       alignment: Alignment.center,
@@ -66,15 +64,15 @@ class Exposure extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Text(
-                                '${provider.fullexposure}',
+                                provider.fullexposure.toStringAsFixed(1),
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20,
                                     color: Color(0xFF89453C)),
                               ),
-                              const Text(
-                                'Low',
-                                style: TextStyle(fontSize: 16),
+                              Text(
+                                provider.exposurelevel,
+                                style: const TextStyle(fontSize: 16),
                               )
                             ]),
                       ))),

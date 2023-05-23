@@ -13,8 +13,6 @@ class Pollutants extends StatelessWidget {
   static const routeDisplayName = 'PollutantsPage';
 
   Pollutants({Key? key}) : super(key: key);
-
-  int aqi = 10;
   DateTime day = DateTime.now();
 
   @override
