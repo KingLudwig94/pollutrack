@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
 import 'package:pollutrack/services/server_strings.dart';
 import 'package:pollutrack/utils/shared_preferences.dart';
-import 'package:pollutrack/models/db.dart';
+import '../models/entities/entities.dart';
 
 class ImpactService {
   ImpactService(this.prefs) {
@@ -146,14 +146,13 @@ class ImpactService {
         String hour = dataday['time'];
         String datetime = '${day}T$hour';
         DateTime timestamp = _truncateSeconds(DateTime.parse(datetime));
-        HR hrnew = HR(timestamp: timestamp, value: dataday['value']);
-        if (!hr.any((e) => e.timestamp.isAtSameMomentAs(hrnew.timestamp))) {
+        HR hrnew = HR(null, dataday['value'], timestamp);
+        if (!hr.any((e) => e.dateTime.isAtSameMomentAs(hrnew.dateTime))) {
           hr.add(hrnew);
         }
       }
     }
-    var hrlist = hr.toList()
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    var hrlist = hr.toList()..sort((a, b) => a.dateTime.compareTo(b.dateTime));
     return hrlist;
   }
 

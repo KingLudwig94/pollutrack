@@ -5,8 +5,12 @@ import 'package:pollutrack/services/purpleair.dart';
 import 'package:pollutrack/utils/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'models/db.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final db = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
+  runApp(Provider<AppDatabase>.value(value: db, child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -30,7 +34,7 @@ class MyApp extends StatelessWidget {
                 )),
         Provider(
             create: (context) => PurpleAirService(
-                Provider.of<Preferences>(context, listen: false)))
+                Provider.of<Preferences>(context, listen: false))),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

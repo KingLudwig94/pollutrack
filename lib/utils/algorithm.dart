@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:pollutrack/models/db.dart';
+import '../models/entities/entities.dart';
 
 List<Ventilation> getMinuteVentilation(List<HR> heartrate, int gender) {
   // double sumheart = 0;
@@ -18,11 +18,11 @@ List<Ventilation> getMinuteVentilation(List<HR> heartrate, int gender) {
       if (gender == 1) {
         // UOMO
         double val = pow(e, 1.03 + (0.021 * valheart)) as double;
-        vent.add(Ventilation(hr.timestamp, val));
+        vent.add(Ventilation(hr.dateTime, val));
       } else {
         // DONNA
         double val = pow(e, 0.57 + (0.023 * valheart)) as double;
-        vent.add(Ventilation(hr.timestamp, val));
+        vent.add(Ventilation(hr.dateTime, val));
       }
     }
   }
@@ -38,9 +38,9 @@ List<Exposure> getInhalation(
     // Extract the mean value of heart rate in the 10 minutes before of a pm data point
     List<Ventilation> tmp = minuteVentilation
         .where((element) =>
-            element.timestamp.difference(pm.timestamp) >
+            element.timestamp.difference(pm.dateTime) >
                 const Duration(minutes: -10) &&
-            element.timestamp.difference(pm.timestamp) <= Duration.zero)
+            element.timestamp.difference(pm.dateTime) <= Duration.zero)
         .toList();
 
     if (tmp.isNotEmpty) {
@@ -48,8 +48,7 @@ List<Exposure> getInhalation(
           tmp.map((e) => e.vent).reduce((value, element) => value + element) /
               tmp.length;
 
-      exposure.add(Exposure(
-          timestamp: pm.timestamp, value: tmpMean * pm.value * 10 / 1000));
+      exposure.add(Exposure(null, tmpMean * pm.value * 10 / 1000, pm.dateTime));
     }
   }
 

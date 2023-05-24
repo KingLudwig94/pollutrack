@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:pollutrack/models/db.dart';
+import 'package:pollutrack/models/entities/entities.dart';
 import 'package:pollutrack/services/impact.dart';
 import 'package:pollutrack/services/purpleair.dart';
 import 'package:pollutrack/services/server_strings.dart';
@@ -18,90 +19,101 @@ class HomeProvider extends ChangeNotifier {
   late int aqi;
   late double fullexposure;
   late String exposurelevel;
+  final AppDatabase db;
 
-  // data fetched from external services or db
-  late List<HR> _heartRatesDB;
-  late List<Exposure> _exposureDB;
-  late List<PM25> _pm25DB;
+  // data fetched from external services
+  late List<HR> _heartRates;
+  late List<Exposure> _exposure;
+  late List<PM25> _pm25;
 
   // selected day of data to be shown
   DateTime showDate = DateTime.now().subtract(const Duration(days: 1));
 
-  // data generators faking external services
-  final FitbitGen fitbitGen = FitbitGen();
-  final PurpleAirGen purpleAirGen = PurpleAirGen();
-  final Random _random = Random();
-
   final PurpleAirService purpleAir;
-  DateTime lastFetch = DateTime.now().subtract(Duration(days: 2));
+  late DateTime lastFetch;
   final ImpactService impactService;
 
   bool doneInit = false;
 
-  HomeProvider(this.purpleAir, this.impactService) {
+  HomeProvider(this.purpleAir, this.impactService, this.db) {
     _init();
   }
 
   // constructor of provider which manages the fetching of all data from the servers and then notifies the ui to build
   Future<void> _init() async {
     await _fetchAndCalculate();
-    getDataOfDay(showDate);
+    await getDataOfDay(showDate);
     doneInit = true;
     notifyListeners();
   }
 
+  Future<DateTime?> _getLastFetch() async {
+    var data = await db.exposuresDao.findAllExposures();
+    if (data.isEmpty) {
+      return null;
+    }
+    return data.last.dateTime;
+  }
+
   // method to fetch all data and calculate the exposure
   Future<void> _fetchAndCalculate() async {
-    //_heartRatesDB = fitbitGen.fetchHR();
-    // if (lastFetch.difference(DateTime.now()).inMinutes.abs() > 5) {
-    //   _pm25DB = await _fetchPurpleAir(lastFetch);
-    //   aqi = _calculateAqi().toInt();
-    // }
+    lastFetch = await _getLastFetch() ??
+        DateTime.now().subtract(const Duration(days: 2));
+    // do nothing if already fetched
+    if (lastFetch.day == DateTime.now().subtract(const Duration(days: 1)).day) {
+      return;
+    }
+    _heartRates = await impactService.getDataFromDay(lastFetch);
+    for (var element in _heartRates) {
+      db.heartRatesDao.insertHeartRate(element);
+    } // db add to the table
 
-    _heartRatesDB = await impactService.getDataFromDay(lastFetch);
-    _pm25DB = await _fetchPurpleAir(lastFetch);
-    aqi = _calculateAqi().toInt();
-    _calculateExposure(_heartRatesDB, _pm25DB);
+    _pm25 = await _fetchPurpleAir(lastFetch);
+    for (var element in _pm25) {
+      db.pmsDao.insertPm(element);
+    } // db add to the table
+
+    aqi = _calculateAqi(_pm25.last.value).toInt();
+    _calculateExposure(_heartRates, _pm25);
   }
 
   // method to trigger a new data fetching
-  void refresh() {
-    _fetchAndCalculate();
-    getDataOfDay(showDate);
+  Future<void> refresh() async {
+    await _fetchAndCalculate();
+    await getDataOfDay(showDate);
   }
 
   // method that implements the state of the art formula
   void _calculateExposure(List<HR> hr, List<PM25> pm25) {
-    // _exposureDB = List.generate(
-    //     100,
-    //     (index) => Exposure(
-    //         value: _heartRatesDB[index].value * _pm25DB[index].value,
-    //         timestamp: DateTime.now().subtract(Duration(hours: index))));
     var vent = getMinuteVentilation(hr, 0);
-    _exposureDB = getInhalation(vent, pm25);
+    _exposure = getInhalation(vent, pm25);
+    for (var element in _exposure) {
+      db.exposuresDao.insertExposure(element);
+    } // db add to the table
   }
 
   // method to select only the data of the chosen day
-  void getDataOfDay(DateTime showDate) {
+  Future<void> getDataOfDay(DateTime showDate) async {
+    // check if the day we want to show has data
+    var firstDay = await db.exposuresDao.findFirstDayInDb();
+    var lastDay = await db.exposuresDao.findLastDayInDb();
+    if (showDate.isAfter(lastDay!.dateTime) ||
+        showDate.isBefore(firstDay!.dateTime)) return;
+        
     this.showDate = showDate;
-    heartRates = _heartRatesDB
-        .where((element) => element.timestamp.day == showDate.day)
-        .toList()
-        .reversed
-        .toList();
-    pm25 = _pm25DB
-        .where((element) => element.timestamp.day == showDate.day)
-        .toList()
-        .reversed
-        .toList();
-    exposure = _exposureDB
-        .where((element) => element.timestamp.day == showDate.day)
-        .toList()
-        .reversed
-        .toList();
+    heartRates = await db.heartRatesDao.findHeartRatesbyDate(
+        DateUtils.dateOnly(showDate),
+        DateTime(showDate.year, showDate.month, showDate.day, 23, 59));
+    pm25 = await db.pmsDao.findPmsbyDate(DateUtils.dateOnly(showDate),
+        DateTime(showDate.year, showDate.month, showDate.day, 23, 59));
+    exposure = await db.exposuresDao.findExposuresbyDate(
+        DateUtils.dateOnly(showDate),
+        DateTime(showDate.year, showDate.month, showDate.day, 23, 59));
     fullexposure = exposure.map((e) => e.value).reduce(
           (value, element) => value + element,
         );
+    aqi = _calculateAqi(pm25.last.value).toInt();
+
     if (fullexposure < 333) {
       exposurelevel = 'Low';
     } else if (fullexposure < 666) {
@@ -119,19 +131,16 @@ class HomeProvider extends ChangeNotifier {
     final List<dynamic> pm25 = data['data'];
     List<PM25> out = pm25
         .map((e) => PM25(
-            timestamp:
-                DateTime.fromMillisecondsSinceEpoch((e[0] * 1000).toInt()),
-            value: e[1]))
-        .toList()
-      ..sort(
-        (a, b) => a.timestamp.compareTo(b.timestamp),
-      );
+              null,
+              e[1],
+              DateTime.fromMillisecondsSinceEpoch((e[0] * 1000).toInt()),
+            ))
+        .toList();
     print(out);
     return out;
   }
 
-  double _calculateAqi() {
-    double value = _pm25DB.last.value;
+  double _calculateAqi(double value) {
     if (value <= 15) {
       return value / 15 * 25;
     } else if (value <= 30) {

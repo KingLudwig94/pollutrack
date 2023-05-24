@@ -1,53 +1,26 @@
-import 'dart:math';
+//Imports that are necessary to the code generator of floor
+import 'dart:async';
 
-class HR {
-  // this class models the single heart rate data point
-  final DateTime timestamp;
-  final int value;
+import 'package:floor/floor.dart';
+import 'package:sqflite/sqflite.dart' as sqflite;
 
-  HR({required this.timestamp, required this.value});
-}
+import 'daos/dao.dart';
+import 'entities/entities.dart';
+import 'typeConverters/dateTimeConverter.dart';
 
-class PM25 {
-  // this class models the single PM2.5 data point
-  final DateTime timestamp;
-  final double value;
+//Here, we are importing the entities and the daos of the database
 
-  PM25({required this.timestamp, required this.value});
+//The generated code will be in database.g.dart
+part 'db.g.dart';
 
-  @override
-  String toString() {
-    return '${timestamp.toIso8601String()} - $value';
-  }
-}
-
-class Exposure {
-  // this class models the single calculated exposure value
-  final DateTime timestamp;
-  final double value;
-
-  Exposure({required this.timestamp, required this.value});
-}
-
-class FitbitGen {
-  final Random _random = Random();
-
-  List<HR> fetchHR() {
-    return List.generate(
-        100,
-        (index) => HR(
-            timestamp: DateTime.now().subtract(Duration(hours: index)),
-            value: _random.nextInt(180)));
-  }
-}
-
-class PurpleAirGen {
-  final Random _random = Random();
-  List<PM25> fetchPM() {
-    return List.generate(
-        100,
-        (index) => PM25(
-            timestamp: DateTime.now().subtract(Duration(hours: index)),
-            value: _random.nextDouble() * 150));
-  }
-}
+//Here we are saying that this is the first version of the Database and it has just 1 entity, i.e., Meal.
+//We also added a TypeConverter to manage the DateTime of a Meal entry, since DateTimes are not natively
+//supported by Floor.
+@TypeConverters([DateTimeConverter])
+@Database(version: 1, entities: [HR, Exposure, PM25])
+abstract class AppDatabase extends FloorDatabase {
+  //Add all the daos as getters here
+  HeartRatesDao get heartRatesDao;
+  ExposuresDao get exposuresDao;
+  PmsDao get pmsDao;
+}//AppDatabase

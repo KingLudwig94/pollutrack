@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:pollutrack/widgets/custom_plot.dart';
 import 'package:pollutrack/widgets/score_circular_progress.dart';
-import 'package:pollutrack/models/db.dart';
+import 'package:pollutrack/models/entities/entities.dart';
 
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -155,7 +155,7 @@ class Pollutants extends StatelessWidget {
     return data
         .map(
           (e) => {
-            'date': DateFormat('HH:mm').format(e.timestamp),
+            'date': DateFormat('HH:mm').format(e.dateTime),
             'points': e.value
           },
         )

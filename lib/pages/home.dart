@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pollutrack/models/db.dart';
 import 'package:pollutrack/pages/login/login.dart';
 import 'package:pollutrack/pages/pollutants.dart';
 import 'package:pollutrack/pages/profile.dart';
@@ -61,7 +62,9 @@ class _HomeState extends State<Home> {
     return ChangeNotifierProvider<HomeProvider>(
       create: (context) => HomeProvider(
           Provider.of<PurpleAirService>(context, listen: false),
-          Provider.of<ImpactService>(context, listen: false)),
+          Provider.of<ImpactService>(context, listen: false),
+          Provider.of<AppDatabase>(context, listen: false)),
+      lazy: false,
       builder: (context, child) => Scaffold(
           backgroundColor: const Color(0xFFE4DFD4),
           drawer: Drawer(

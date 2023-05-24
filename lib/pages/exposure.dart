@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pollutrack/widgets/custom_plot.dart';
 import 'package:pollutrack/widgets/score_circular_progress.dart';
-import 'package:pollutrack/models/db.dart' as db;
+import 'package:pollutrack/models/entities/entities.dart' as db;
 import '../../providers/home_provider.dart';
 
 import 'package:intl/intl.dart';
@@ -128,7 +128,7 @@ class Exposure extends StatelessWidget {
     return data
         .map(
           (e) => {
-            'date': DateFormat('HH:mm').format(e.timestamp),
+            'date': DateFormat('HH:mm').format(e.dateTime),
             'points': e.value
           },
         )
